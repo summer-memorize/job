@@ -1,10 +1,16 @@
-# production:
-#   periodic_cleanup:
-#     class: CleanSoftDeletedRecordsJob
-#     queue: background
-#     args: [ 1000, { batch_size: 500 } ]
-#     schedule: every hour
-#   periodic_command:
-#     command: "SoftDeletedRecord.due.delete_all"
-#     priority: 2
-#     schedule: at 5am every day
+development:
+  english_study:
+    class: EnglishStudyJob
+    args: []
+    schedule: every 5s
+    queue: default
+  japanese_study:
+    class: JapaneseStudyJob
+    args: []
+    schedule: every 5s
+    queue: default
+  stock_study:
+    class: StockStudyJob
+    args: []
+    schedule: every 5s
+    queue: default
