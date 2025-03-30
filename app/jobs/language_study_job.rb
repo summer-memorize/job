@@ -114,31 +114,29 @@ class LanguageStudyJob < ApplicationJob
     After each line, provide a natural Korean translation that reflects the tone and context.
 
     Format:
-    *Name1*: ...
+    *이름1*: ...
             : ... (Korean translation)
-    *Name2*: ...
+    *이름2*: ...
             : ... (Korean translation)
     ...
   ENGLISH_DIALOGUE_PROMPT_FORMAT
 
   ENGLISH_PHRASES_PROMPT_FORMAT = <<~ENGLISH_PHRASES_PROMPT_FORMAT
-    The topic is: "%<content>s".
+    The dialogue is: "%<dialogue>s".
 
     [Useful Expressions]
-    Extract 5 to 10 useful and natural expressions commonly used by native English speakers in the context of "%<content>s".
+    Extract 5 to 10 useful and natural expressions commonly used by native English speakers in the context of "%<dialogue>s".
     For each expression, include the following:
-    - The phrase
+    - The expression
     - A natural Korean translation that reflects the meaning and tone
     - A short example sentence in English
     - A natural Korean translation of the example sentence
 
     Format:
-    - *Phrase*: ...
+    - *단어*: ...
             : ... (Korean translation)
-      - *Meaning*: ...
-              : ... (Korean translation)
-      - Example: ...
-              : ... (Korean translation)
+    - *예시*: ...
+            : ... (Korean translation)
   ENGLISH_PHRASES_PROMPT_FORMAT
 
   JAPANESE_DIALOGUE_PROMPT_FORMAT = <<~JAPANESE_DIALOGUE_PROMPT_FORMAT
@@ -152,20 +150,20 @@ class LanguageStudyJob < ApplicationJob
     After each line, provide the Hiragana reading and a natural Korean translation that reflects the tone and context.
 
     Format:
-    *名前1*: ...
+    *이름1*: ...
             : ... (Hiragana)
             : ... (Korean translation)
-    *名前2*: ...
+    *이름2*: ...
             : ... (Hiragana)
             : ... (Korean translation)
     ...
   JAPANESE_DIALOGUE_PROMPT_FORMAT
 
   JAPANESE_PHRASES_PROMPT_FORMAT = <<~JAPANESE_PHRASES_PROMPT_FORMAT
-    The topic is: "%<content>s".
+    The dialogue is: "%<dialogue>s".
 
     [Useful Expressions]
-    Extract 5 to 10 useful and natural expressions commonly used by native Japanese speakers in the context of "%<content>s".
+    Extract 5 to 10 useful and natural expressions commonly used by native Japanese speakers in the context of "%<dialogue>s".
     For each expression, include the following:
     - The expression
     - The Hiragana reading
@@ -175,12 +173,12 @@ class LanguageStudyJob < ApplicationJob
     - A natural Korean translation of the example sentence
 
     Format:
-    - *表現*: ...
+    - *단어*: ...
             : ... (Hiragana)
             : ... (Korean translation)
-      - *例文*: ...
-              : ... (Hiragana)
-              : ... (Korean translation)
+    - *예시*: ...
+            : ... (Hiragana)
+            : ... (Korean translation)
   JAPANESE_PHRASES_PROMPT_FORMAT
 
   LANGUAGES_CONFIG = {
@@ -216,9 +214,11 @@ class LanguageStudyJob < ApplicationJob
         phrases_response = client.chat(
           parameters: {
             model: "gpt-4o-mini",
-            messages: [ { role: "user", content: format(phrases_prompt_format, content: ai_dialogue_content) } ]
+            messages: [ { role: "user", content: format(phrases_prompt_format, dialogue: ai_dialogue_content) } ]
           }
         )
+        binding.pry
+
         ai_phrases_content = phrases_response.dig("choices", 0, "message", "content")
         Lesson.create(
           topic: topic,
