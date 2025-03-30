@@ -13,7 +13,8 @@
 ActiveRecord::Schema[8.0].define(version: 2025_03_30_031001) do
   create_table "lessons", force: :cascade do |t|
     t.string "topic", null: false
-    t.text "content", null: false
+    t.text "dialogue", null: false
+    t.text "phrases", null: false
     t.integer "language", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
