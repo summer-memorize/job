@@ -29,14 +29,11 @@ class EnglishStudyJob < ApplicationJob
     "Asking if there is a two-person table available at a café"
   ]
 
-  def perform(*args)
-    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
-    topic = TOPICS.sample
-    content = <<~PROMPT
-    #{topic}
+  PROMPT_FORMAT = <<~PROMPT
+    The topic is: "%<topic>s".
 
     [Today's Dialogue]
-    Write a natural and realistic conversation between a customer and an employee in the U.S. The topic is: "{topic}". The conversation should include 5 to 10 back-and-forth lines (alternating between customer and employee). Use natural, everyday English with commonly used American phrases and expressions. Keep it casual and realistic. Avoid overly formal or textbook-style language.
+    Write a natural and realistic conversation between a customer and an employee in the U.S. The topic is: "%<topic>s". The conversation should include 5 to 10 back-and-forth lines (alternating between customer and employee). Use natural, everyday English with commonly used American phrases and expressions. Keep it casual and realistic. Avoid overly formal or textbook-style language.
 
     [Today's Words and Phrases]
     From the dialogue above, extract the most useful and natural words and expressions commonly used by native American English speakers (about 5 to 10).
@@ -51,7 +48,7 @@ class EnglishStudyJob < ApplicationJob
 
     Make sure to format the response exactly like this structure:
 
-    **#{topic}**
+    **%<topic>s**
 
     [Today's Dialogue]
     customer: ...
@@ -69,16 +66,29 @@ class EnglishStudyJob < ApplicationJob
     점원: ...
     PROMPT
 
-    response = client.chat(
-      parameters: {
-        model: "gpt-3.5-turbo",
-        messages: [ { role: "user", content: content } ]
-      }
-    )
+  SEQUENCE = 3
 
-    Lesson.create(topic: topic, content: response, language: "english")
+  def perform(*args)
+    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
 
-    notifier = Slack::Notifier.new(ENV["SLACK_ENGLISH_WEBHOOK_URL"])
-    notifier.ping(response)
+    SEQUENCE.times do
+      topic = TOPICS.sample
+      content = format(PROMPT_FORMAT, topic: topic)
+
+      response = client.chat(
+        parameters: {
+          model: "gpt-3.5-turbo",
+          messages: [ { role: "user", content: content } ]
+        }
+      )
+      message_content = response.dig("choices", 0, "message", "content")
+      Lesson.create(topic: topic, content: message_content, language: "english")
+
+      notifier = Slack::Notifier.new(ENV["SLACK_ENGLISH_WEBHOOK_URL"])
+      notifier.ping(message_content)
+    end
   end
+
+
+  private
 end
