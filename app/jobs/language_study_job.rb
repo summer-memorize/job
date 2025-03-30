@@ -213,7 +213,6 @@ class LanguageStudyJob < ApplicationJob
           }
         )
         ai_dialogue_content = dialogue_response.dig("choices", 0, "message", "content")
-        binding.pry
         phrases_response = client.chat(
           parameters: {
             model: "gpt-4o-mini",
