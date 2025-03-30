@@ -213,6 +213,7 @@ class LanguageStudyJob < ApplicationJob
           }
         )
         ai_dialogue_content = dialogue_response.dig("choices", 0, "message", "content")
+        binding.pry
         phrases_response = client.chat(
           parameters: {
             model: "gpt-4o-mini",
@@ -220,7 +221,7 @@ class LanguageStudyJob < ApplicationJob
           }
         )
         ai_phrases_content = phrases_response.dig("choices", 0, "message", "content")
-        Lesson.create!(
+        Lesson.create(
           topic: topic,
           dialogue: ai_dialogue_content,
           phrases: ai_phrases_content,
