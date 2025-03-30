@@ -1,11 +1,6 @@
 development:
   english_study:
-    class: EnglishStudyJob
-    args: []
-    schedule: every 5s
-    queue: default
-  japanese_study:
-    class: JapaneseStudyJob
+    class: LanguageStudyJob
     args: []
     schedule: every 5s
     queue: default
